@@ -1,0 +1,10 @@
+import time
+time.sleep(1)
+print('========================================')
+print('ArrowDOS의 지원이 종료되었습니다!')
+time.sleep(2)
+print('ArrowDOS는 구 버전의 DOS를 지원 종료하고\n새로운 DOS버전을 만들고 있습니다.')
+time.sleep(2)
+print('ArrowDOS의 새로운 기능과 보안 패치를 받고 싶으면 업데이트 하시오.')
+print('========================================')
+time.sleep(2)
