@@ -9,8 +9,9 @@ try:
     dir=Path.cwd()
     os.system('cls')
 
-    with open(os.path.join(dir, 'SYS32','OSHD.txt'), 'r', encoding='utf-8') as f:
-        OSHD = [line.strip() for line in f.readlines()]
+    def path_exists(path: str) -> bool:
+        return os.path.exists(path) and os.path.isfile(path)
+
 
     def harddisk():
         bytes = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
@@ -21,23 +22,26 @@ try:
                 return f"{bytes:.2f} {unit}"
             bytes /= 1024
 
-    bytes_size = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
+    if path_exists(f"{dir}\\SYS32\\OSHD.txt")==True:
+        with open(os.path.join(dir, 'SYS32','OSHD.txt'), 'r', encoding='utf-8') as f:
+            OSHD = [line.strip() for line in f.readlines()]
+        bytes_size = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
+        
+        # 2. Byte를 GB 단위로 변환 (출력용이나 다른 곳에 쓰실 때 활용)
+        dir_gb = bytes_size / (1024 ** 3)
 
-    # 2. Byte를 GB 단위로 변환
-    dir_gb = bytes_size / (1024 ** 3)
-
-    # 3. 크기 비교 (dir이 OSHD보다 크면 실행)
-    if int(dir_gb) > int(OSHD[0]):
-        print('디스크 용량 초과!')
-        print('정상적으로 실행되지 않다면 시스템 복구 모드를 사용하세요!')
-        time.sleep(2)
-        args = [sys.executable, os.path.join(dir,'mainboot.py')]
-        subprocess.run(args)
-
+        # 3. 크기 비교 (Byte 단위로 직접 계산해서 정확하게 비교)
+        if bytes_size > float(OSHD[0]) * (1024 ** 3):
+            print('디스크 용량 초과!')
+            print('정상적으로 실행되지 않다면 시스템 복구 모드를 사용하세요!')
+            time.sleep(2)
+            args = [sys.executable, os.path.join(dir,'mainboot.py')]
+            subprocess.run(args)
+        else:
+            pass
+        print(f'하드 디스크 용량: {OSHD[0]}GB / {harddisk()} 사용됨.')
     else:
         pass
-
-    print(f'하드 디스크 용량: {OSHD[0]}GB / {harddisk()} 사용됨.')
 
     def guiboot():
         subprocess.run([sys.executable, os.path.join(dir,'SYS32','SYSF','-guiboot-','main.py')])
@@ -46,8 +50,7 @@ try:
     tmp=''
     dv=False
     pygame.mixer.init()
-    def path_exists(path: str) -> bool:
-        return os.path.exists(path) and os.path.isfile(path)
+
     with open(os.path.join(dir, 'SYS32','osname.txt'), 'r', encoding='utf-8') as f:
         osname = [line.strip() for line in f.readlines()]
     def sound(a):
