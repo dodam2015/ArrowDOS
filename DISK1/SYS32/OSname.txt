@@ -1,6 +1,6 @@
-ArrowDOS1.5
+ArrowDOS
 made by ArrowCorp.
-v1.5-2026517s
-26R1
-build14
-20270517
+v1.5-2026529p
+26R2
+build18
+20300105

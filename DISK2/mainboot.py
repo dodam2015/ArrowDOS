@@ -9,39 +9,17 @@ try:
     parent_name=Path.cwd().name
     def path_exists(path: str) -> bool:
         return os.path.exists(path) and os.path.isfile(path)
-
-    with open(os.path.join(dir, 'SYS32','SYSF','openbtmn.arsys'), 'r', encoding='utf-8') as f:
-        bootmn = f.readline().strip()
-
-    if bootmn[0]=='t':
-        subprocess.run([sys.executable, "SYS32/MAIN/main.py"])
-    elif bootmn[0]=='f':
-        pass
-
-
-    print("\033[32mArrowDOS부팅매니저\033[34m-v1.1.1\033[0m")
+    print("\033[32mArrowDOS 복구 매니저\033[34m-v1.0\033[0m")
     time.sleep(2)
-    print("사용하실 부팅 모드를 선택하세요.")
-    print("1.\033[36m일반 모드\033[0m")
-    print("2.\033[31mDOS모드\033[0m")
-    print("3.그 외 디스크로 부팅하기...")
+    cmd=''
+    cd=parent_name
     while True:
-        bootmod=int(input("번호를 입력하세요:"))
-        if bootmod==1:
-            print("\033[36m일반 모드\033[0m를 선택하셨습니다.")
-            print("\033[33m2\033[m초 후에 \033[36m일반 모드\033[0m로 진입합니다.")
-            time.sleep(2)
-            os.system("cls")
-            subprocess.run([sys.executable, "SYS32/MAIN/main.py"])
-            break
-        elif bootmod==2:
-            print("\033[31mDOS모드\033[0m를 선택하셨습니다.")
-            print("\033[33m2\033[m초 후에 \033[31mDOS모드\033[0m로 진입합니다.")
-            time.sleep(2)
-            os.system("cls")
-            subprocess.run([sys.executable, "SYS32/DOSmod/main.py"])
-            break
-        elif bootmod==3:
+        cmd=input(f'{cd} >')
+        if cmd=='?':
+            print('\033[32mArrowDOS\033[0m 도움말 정보를 로드하는 중...')
+            print('    ? - 이 명령어는 \033[32mArrowDOS 복구 매니저\033[0m의 기능(도움말)을 불러와주는 간단한 명령어입니다.')
+            print('    bootmn - 부팅 매니저를 실행합니다.')
+        elif cmd=='bootmn':
             print('그 외 디스크로 부팅합니다...')
             time.sleep(1)
             print('번호로 선택하세요:')
@@ -79,8 +57,7 @@ try:
             else:
                 print('선택한 번호가 목록에 없습니다.')
                 time.sleep(1)
-        else:
-            print('입력한 번호를 재확인 하고 다시 입력해주세요.')
+
+
 except(Exception,KeyboardInterrupt) as e:
-    args = [sys.executable, os.path.join(dir,'SYS32','BSOD','main.py'), str(e)]
-    subprocess.run(args)
+    print(f'error: {str(e)}')
