@@ -9,8 +9,9 @@ try:
     dir=Path.cwd()
     os.system('cls')
 
-    with open(os.path.join(dir, 'SYS32','OSHD.txt'), 'r', encoding='utf-8') as f:
-        OSHD = [line.strip() for line in f.readlines()]
+    def path_exists(path: str) -> bool:
+        return os.path.exists(path) and os.path.isfile(path)
+
 
     def harddisk():
         bytes = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
@@ -21,23 +22,26 @@ try:
                 return f"{bytes:.2f} {unit}"
             bytes /= 1024
 
-    bytes_size = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
+    if path_exists(f"{dir}\\SYS32\\OSHD.txt")==True:
+        with open(os.path.join(dir, 'SYS32','OSHD.txt'), 'r', encoding='utf-8') as f:
+            OSHD = [line.strip() for line in f.readlines()]
+        bytes_size = sum(f.stat().st_size for f in dir.rglob('*') if f.is_file())
+        
+        # 2. Byte를 GB 단위로 변환 (출력용이나 다른 곳에 쓰실 때 활용)
+        dir_gb = bytes_size / (1024 ** 3)
 
-    # 2. Byte를 GB 단위로 변환
-    dir_gb = bytes_size / (1024 ** 3)
-
-    # 3. 크기 비교 (dir이 OSHD보다 크면 실행)
-    if int(dir_gb) > int(OSHD[0]):
-        print('디스크 용량 초과!')
-        print('정상적으로 실행되지 않다면 시스템 복구 모드를 사용하세요!')
-        time.sleep(2)
-        args = [sys.executable, os.path.join(dir,'mainboot.py')]
-        subprocess.run(args)
-
+        # 3. 크기 비교 (Byte 단위로 직접 계산해서 정확하게 비교)
+        if bytes_size > float(OSHD[0]) * (1024 ** 3):
+            print('디스크 용량 초과!')
+            print('정상적으로 실행되지 않다면 시스템 복구 모드를 사용하세요!')
+            time.sleep(2)
+            args = [sys.executable, os.path.join(dir,'mainboot.py')]
+            subprocess.run(args)
+        else:
+            pass
+        print(f'하드 디스크 용량: {OSHD[0]}GB / {harddisk()} 사용됨.')
     else:
         pass
-
-    print(f'하드 디스크 용량: {OSHD[0]}GB / {harddisk()} 사용됨.')
 
     def guiboot():
         subprocess.run([sys.executable, os.path.join(dir,'SYS32','SYSF','-guiboot-','main.py')])
@@ -46,8 +50,7 @@ try:
     tmp=''
     dv=False
     pygame.mixer.init()
-    def path_exists(path: str) -> bool:
-        return os.path.exists(path) and os.path.isfile(path)
+
     with open(os.path.join(dir, 'SYS32','osname.txt'), 'r', encoding='utf-8') as f:
         osname = [line.strip() for line in f.readlines()]
     def sound(a):
@@ -61,6 +64,14 @@ try:
         return now.strftime(f"%Y년%m월%d일 {ampm}%I시%M분%S초").replace(" 0", " ")
 #시작
 
+
+    if osname[2][-1]=='s':
+        print('프리릴리즈 버전에서는 ArrowDOS의 여러 신기능을 테스트할 수 있고')
+        print('문제점을 개선할 수 있습니다.')
+        print('개발자 이메일: dodam2015no1@naver.com')
+    else:
+        pass
+    time.sleep(2)
     with open(os.path.join(dir, 'SYS32','SYSF','guiboot.arsys'), 'r', encoding='utf-8') as f:
         bootmn = f.readline().strip()
 
@@ -161,7 +172,7 @@ try:
         except Exception as e:
             print("??? 실패:", e)
     if osname[2][-1]=='s':
-        msg.append(f'프리릴리즈 버전입니다! 이 프리릴리즈 마지막 지원 날짜는 {TARGET_YEAR}년 {TARGET_MONTH}월 {TARGET_DAY}일 {TARGET_HOUR}시 {TARGET_MINUTE}분 {TARGET_SECOND}까지 입니다. 새로운 ArrowDOS버전을 미리 테스트 해보세요.')
+        msg.append(f'프리릴리즈 버전입니다! 이 프리릴리즈 마지막 지원 날짜는 {TARGET_YEAR}년 {TARGET_MONTH}월 {TARGET_DAY}일 {TARGET_HOUR}시 {TARGET_MINUTE}분 {TARGET_SECOND}초까지 입니다. 새로운 ArrowDOS버전을 미리 테스트 해보세요.')
     
         logon()
 
@@ -189,12 +200,6 @@ try:
                 print('    ? - 이 명령어는 \033[32mArrowDOS\033[0m의 기능(도움말)을 불러와주는 간단한 명령어입니다.')
                 print('    hlp - 이 명령어는 \033[32mArrowDOS\033[0m의 기능(도움말)을 불러와주는 간단한 명령어입니다.')
                 print('    info - 이 명령어는 \033[32mArrowDOS\033[0m 시스템의 정보를 불러오는 명령어입니다.')
-                print('    dv(T) - 개발자 모드가 켜집니다.')
-                print('    dv(F) - 개발자 모드가 꺼집니다.')
-                if dv==True:
-                    print('regedit - *개발자 기능*이 DOS의 소스코드의 변수를 출력하고 수정합니다.')
-                else:
-                    pass
                 print('    clr - 이 명령어는 터미널의 명령어 입력 내역을 모두 삭제 합니다.')
                 print('    account - 이 명령어는 신원을 확인하고 계정의 보안을 확인하는 명령어입니다.')
                 print('    apps - 앱을 확인합니다.')
@@ -209,6 +214,8 @@ try:
                 print('    diskmgr - 디스크 매니저를 실행합니다.')
                 print('    ctpl - 제어판을 엽니다.')
                 print('    logout - 로그아웃 합니다.')
+                print('    credit - 도움을 주신 개발자들을 출력합니다.')
+                print('    curnel(명령어) - 커널 모드에 접근합니다.')
             elif cmd=='info':
                 print('\033[32mArrowDOS\033[0m 시스템 정보를 로드하는 중...')
                 time.sleep(1)
@@ -225,16 +232,6 @@ try:
                 else:
                     print('    무단 복제본 또는 수정된 버전. 사기에 조심하세요.')
                 print(f'하드 디스크 용량: {OSHD[0]}GB / {harddisk()} 사용됨.')
-            elif cmd.startswith('dv(') and cmd.endswith(')'):
-                if cmd[3:-1]=='T':
-                    dv=True
-                    print('개발자 모드가 켜졌습니다.')
-                elif cmd[3:-1]=='F':
-                    dv=False
-                    print('개발자 모드가 꺼졌습니디.')
-                else:
-                    print('dv(T) - 개발자 모드를 켭니다.')
-                    print('dv(F) - 개발자 모드를 끕니다.')
             elif cmd=='clr':
                 os.system('cls')
             elif cmd=='account':
@@ -242,47 +239,6 @@ try:
                 time.sleep(1)
                 tmp=os.path.join(dir,'SYS32','SYSdriver','UserManager','UserManager.py')
                 subprocess.run([sys.executable,tmp])
-            elif cmd=='regedit':
-                if dv==True:
-                    while True:
-                            print("\n변수 목록:")
-                            print("-" * 35)
-
-                            vars_dict = {k: v for k, v in locals().items() 
-                                        if not k.startswith(('_', 'var_edit')) and k != 'vars_dict'}
-
-                            if not vars_dict:
-                                print(" (변수 없음)")
-                            else:
-                                for k in sorted(vars_dict):
-                                    print(f" {k:>12} = {repr(vars_dict[k])}")
-                            print("-" * 35)
-
-                            name = input("\n수정할 변수 (종료: q 또는 엔터): ").strip()
-                            if not name or name.lower() in ('q', 'quit'):
-                                print("종료\n")
-                                break
-
-                            if name not in vars_dict:
-                                print(f"→ {name} 변수 없음\n")
-                                continue
-
-                            print(f"  현재: {repr(vars_dict[name])}")
-                            value_str = input(f"  새 값: ").strip()
-
-                            if not value_str:
-                                print("취소\n")
-                                continue
-
-                            try:
-                                new_val = eval(value_str, {"__builtins__": {}}, vars_dict)
-                                locals()[name] = new_val
-                                print(f"→ {name} = {repr(new_val)}\n")
-                            except Exception as e:
-                                print(f"오류: {e}")
-                                print("예: 42, '텍스트', [1,2,3], None\n")
-                else:
-                    print('개발자 기능입니다.')
             elif cmd=='apps':
                 print("앱을 불러오는 중 입니다...\n")
                 time.sleep(1)   
@@ -384,7 +340,24 @@ try:
             elif cmd=='logout':
                 os.system('cls')
                 logon()
-
+            elif cmd=='credit':
+                print('도움을 주신 분들')
+                print('원작자:')
+                print('    호기심소년 (ArrowCorp)')
+                print('그 외:')
+                print('    Gemini AI')
+            elif cmd.startswith('curnel(') and cmd.endswith(')'):
+                print('-----사용자 계정 컨트롤-----')
+                print(f'{cmd[7:-1]}이 (가) 사용자의 ArrowDOS를 변경할 수 있도록 허용하시겠습니까? (y or n)')
+                tmp=''
+                tmp=input('선택하세요: ')
+                if tmp=='y':
+                    args = [sys.executable, os.path.join(dir,'SYS32','SYSdriver','curnel',cmd[7:-1],'main.py')]
+                    subprocess.run(args)
+                    sound('info.mp3')
+                else:
+                    print('취소되었습니다.')
+                    sound('error.mp3')
             else:
                 sound('error.mp3')
                 print(f"{cmd}는 유효한 경로나 파일, 응용 프로그램 단축이 아닙니다.\n도움말을 불러오시려면 ?를 입력해주세요.")
